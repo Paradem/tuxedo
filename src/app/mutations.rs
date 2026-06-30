@@ -120,8 +120,6 @@ impl App {
     }
 
     pub fn launch_editor(&mut self) {
-        use std::io::Write as _;
-
         let idx = match self.selection.editing() {
             Some(idx) => idx,
             None => match self.cur_abs() {
