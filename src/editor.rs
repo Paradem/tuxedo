@@ -10,7 +10,7 @@ impl TempFile {
     fn create(content: &str) -> Result<Self> {
         let mut path = std::env::temp_dir();
         path.push(format!(
-            "tuxedo-edit-{}-{}.txt",
+            "tuxedo-edit-{}-{}.todo.txt",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
