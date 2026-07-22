@@ -206,10 +206,6 @@ fn run(
             dirty = true;
         }
         if dirty {
-            if app.needs_clear {
-                terminal.clear()?;
-                app.needs_clear = false;
-            }
             // Extract URL runs from the completed frame before the borrow on
             // terminal ends, then write the OSC 8 overlay directly to the
             // backend writer. Doing this here (rather than inside `ui::draw`)
@@ -233,7 +229,13 @@ fn run(
                 Event::Key(key) if key.kind == KeyEventKind::Press => {
                     handle_key(app, key, keybinds);
                     if let Some(path) = app.take_pending_editor_path() {
-                        open_path_in_editor(&path)?;
+                        terminal = open_path_in_editor(&path)?;
+                    }
+                    if let Some((_idx, raw)) = app.take_pending_editor_task() {
+                        ratatui::restore();
+                        let result = tuxedo::editor::edit_in_editor(&raw);
+                        terminal = ratatui::try_init()?;
+                        app.finish_editor_edit(&result);
                     }
                     dirty = true;
                 }
@@ -288,24 +290,18 @@ fn poll_config_reload(app: &mut App, rx: &Option<mpsc::Receiver<()>>) -> bool {
     }
 }
 
-fn open_path_in_editor(path: &std::path::Path) -> Result<()> {
+fn open_path_in_editor(path: &std::path::Path) -> Result<DefaultTerminal> {
     let editor = std::env::var("VISUAL")
         .or_else(|_| std::env::var("EDITOR"))
         .unwrap_or_else(|_| "nvim".to_string());
     ratatui::restore();
-    let status = std::process::Command::new(&editor)
+    let result = std::process::Command::new(&editor)
         .arg(path)
         .status()
         .with_context(|| format!("failed to launch editor `{editor}`"));
-    ratatui::crossterm::terminal::enable_raw_mode()?;
-    ratatui::crossterm::execute!(
-        io::stdout(),
-        ratatui::crossterm::terminal::EnterAlternateScreen
-    )?;
-    match status {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e),
-    }
+    let terminal = ratatui::try_init()?;
+    result?;
+    Ok(terminal)
 }
 
 fn next_timeout(app: &App) -> Duration {
@@ -1295,7 +1291,11 @@ fn apply_action(app: &mut App, action: Action) {
             app.recompute_visible();
         }
         Action::LaunchEditor => {
-            app.launch_editor();
+            if let Some(idx) = app.cur_abs()
+                && let Some(raw) = app.task_raw(idx)
+            {
+                app.start_editor_edit(idx, raw);
+            }
         }
     }
 }

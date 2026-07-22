@@ -119,37 +119,13 @@ impl App {
         }
     }
 
-    pub fn launch_editor(&mut self) {
-        let idx = match self.selection.editing() {
-            Some(idx) => idx,
-            None => match self.cur_abs() {
-                Some(idx) => idx,
-                None => return,
-            },
+    pub fn finish_editor_edit(&mut self, result: &anyhow::Result<Option<String>>) {
+        let Some((idx, _old_raw)) = self.pending_editor_task.take() else {
+            return;
         };
-        let raw = match self.task_raw(idx) {
-            Some(r) => r,
-            None => return,
-        };
-
-        crossterm::terminal::disable_raw_mode().ok();
-        let _ = crossterm::execute!(
-            std::io::stdout(),
-            crossterm::terminal::LeaveAlternateScreen
-        );
-
-        let result = crate::editor::edit_in_editor(&raw);
-
-        let _ = crossterm::execute!(
-            std::io::stdout(),
-            crossterm::terminal::EnterAlternateScreen
-        );
-        crossterm::terminal::enable_raw_mode().ok();
-        self.needs_clear = true;
-
         match result {
             Ok(Some(new_raw)) => {
-                match self.store.edit_line(idx, &new_raw) {
+                match self.store.edit_line(idx, new_raw) {
                     EditOutcome::Saved { abs } => {
                         self.flash("saved");
                         self.after_mutation(abs);
