@@ -119,10 +119,7 @@ impl App {
         }
     }
 
-    pub fn finish_editor_edit(&mut self, result: &anyhow::Result<Option<String>>) {
-        let Some((idx, _old_raw)) = self.pending_editor_task.take() else {
-            return;
-        };
+    pub fn finish_editor_edit(&mut self, idx: usize, result: &anyhow::Result<Option<String>>) {
         match result {
             Ok(Some(new_raw)) => {
                 match self.store.edit_line(idx, new_raw) {
@@ -498,5 +495,20 @@ mod tests {
         assert_eq!(app.week_start, WeekStart::Monday);
         app.toggle_week_start_date();
         assert_eq!(app.week_start, WeekStart::Sunday);
+    }
+
+    #[test]
+    fn finish_editor_edit_writes_edited_text_back_after_run_loop_takes_queue() {
+        let mut app = build_app("original task\n");
+        app.start_editor_edit(0, "original task".into());
+        // The run loop drains the queue before launching the editor, then
+        // hands the editor result and the drained index to finish_editor_edit.
+        let taken = app.take_pending_editor_task();
+        assert!(taken.is_some());
+        app.finish_editor_edit(0, &Ok(Some("edited task".into())));
+        assert_eq!(
+            app.tasks()[0].raw, "edited task",
+            "edited text from the external editor must be written back to the task"
+        );
     }
 }

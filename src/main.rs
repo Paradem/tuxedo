@@ -231,11 +231,11 @@ fn run(
                     if let Some(path) = app.take_pending_editor_path() {
                         terminal = open_path_in_editor(&path)?;
                     }
-                    if let Some((_idx, raw)) = app.take_pending_editor_task() {
+                    if let Some((idx, raw)) = app.take_pending_editor_task() {
                         ratatui::restore();
                         let result = tuxedo::editor::edit_in_editor(&raw);
                         terminal = ratatui::try_init()?;
-                        app.finish_editor_edit(&result);
+                        app.finish_editor_edit(idx, &result);
                     }
                     dirty = true;
                 }
