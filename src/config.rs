@@ -48,6 +48,7 @@ pub struct Config {
     /// task rows (list + archive). The line is stored on disk untouched;
     /// this only affects display. Serialized as `hide_keys = a, b, c`.
     pub hidden_keys: Vec<String>,
+    pub autocomplete_archive: Option<bool>,
     pub week_start: Option<WeekStart>,
 }
 
@@ -168,6 +169,7 @@ fn parse(s: &str) -> Config {
                     .map(str::to_string)
                     .collect();
             }
+            "autocomplete_archive" => c.autocomplete_archive = parse_bool(v),
             "week_start" => c.week_start = v.parse().ok(),
             // Saved searches: `filter.<name> = <query>`. The name is the
             // (trimmed) text after the `filter.` prefix; the query is the
@@ -235,6 +237,9 @@ fn serialize(c: &Config) -> String {
     if !c.hidden_keys.is_empty() {
         let _ = writeln!(out, "hide_keys = {}", c.hidden_keys.join(", "));
     }
+    if let Some(v) = c.autocomplete_archive {
+        let _ = writeln!(out, "autocomplete_archive = {v}");
+    }
     if let Some(v) = c.week_start {
         let _ = writeln!(out, "week_start = {v}");
     }
@@ -282,6 +287,7 @@ mod tests {
             ],
             notes_dir: Some("~/notes".into()),
             hidden_keys: vec!["uid".into(), "sync".into()],
+            autocomplete_archive: Some(true),
             week_start: Some(WeekStart::Sunday),
         };
 
@@ -438,6 +444,7 @@ mod tests {
             filters: vec![("errand".into(), "@errand".into())],
             notes_dir: Some("/tmp/notes".into()),
             hidden_keys: vec!["uid".into()],
+            autocomplete_archive: Some(true),
             week_start: Some(WeekStart::Sunday),
         };
         written.save_to(&path).expect("save should succeed");

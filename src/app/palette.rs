@@ -178,6 +178,11 @@ pub const ENTRIES: &[PaletteEntry] = &[
         action: Action::ToggleShowFuture,
     },
     PaletteEntry {
+        label: "include archive in autocomplete",
+        keys: "I",
+        action: Action::ToggleAutocompleteArchive,
+    },
+    PaletteEntry {
         label: "toggle filter pane",
         keys: "[",
         action: Action::ToggleLeftPane,
@@ -541,6 +546,7 @@ mod tests {
             Action::ToggleLineNum,
             Action::ToggleShowDone,
             Action::ToggleShowFuture,
+            Action::ToggleAutocompleteArchive,
             Action::CopyLine,
             Action::CopyBody,
             Action::EscapeStack,
