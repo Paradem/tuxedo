@@ -9,13 +9,13 @@ expression: buffer_to_text(&buf)
    +health           3      2   (A) Call dentist to reschedule cle due       2026-05-06  today      
    +finance          2     (3)  PRIORITY B  ────────────────────── projects  +work                  
    +home            ┌ tuxedo · command ────────────────────────────────────────┐ptop                
-   +learning        │ > arch█  4 matches                                       │                    
+   +learning        │ > arch█  5 matches                                       │                    
    +personal        │──────────────────────────────────────────────────────────│                    
    +travel          │ ▶ archive completed tasks                              A │                    
                     │   toggle archive view                                  a │1 Finish Q2 board   
- CONTEXTS           │   fuzzy search                                         / │aptop               
-   @errands         │   save search as filter                               fs │6                   
-   @home            │                                                          │                    
+ CONTEXTS           │   include archive in autocomplete                      I │aptop               
+   @errands         │   fuzzy search                                         / │6                   
+   @home            │   save search as filter                               fs │                    
    @laptop          │                                                          │                    
    @phone           │                                                          │                    
                     │                                                          │                    
