@@ -1,7 +1,7 @@
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 
-use crate::search::subseq_match_ci;
+use crate::search::substring_match_ci;
 use crate::theme::Theme;
 use crate::todo::{Task, body_after_priority};
 
@@ -73,7 +73,7 @@ pub fn build_line<'a>(task: &'a Task, opts: RowOpts<'a>, theme: &Theme) -> Line<
     // calls above.
     let body = body_after_priority(&task.clean_raw);
     let body_match_positions: Option<Vec<usize>> =
-        opts.match_term.and_then(|n| subseq_match_ci(body, n));
+        opts.match_term.and_then(|n| substring_match_ci(body, n));
     let body_start = body.as_ptr() as usize;
     let mut rest = body;
     // Whether any visible body token has been emitted yet. Drives the
@@ -382,10 +382,10 @@ mod tests {
     }
 
     #[test]
-    fn build_line_highlights_subsequence_chars() {
-        // "cade" is a subsequence of "Call dentist": C(0), a(1), D(5), e(6).
-        // The renderer should emit highlighted single-char spans for those
-        // positions, with the unmatched chars rendered in the base style.
+    fn build_line_highlights_substring() {
+        // "dent" is a contiguous substring of "Call dentist": d(5), e(6),
+        // n(7), t(8). The renderer should emit a single highlighted run
+        // "dent" for those positions.
         let task = parse_line("Call dentist").unwrap();
         let opts = RowOpts {
             idx_label: 0,
@@ -394,7 +394,7 @@ mod tests {
             multi_checked: false,
             selected: false,
             show_line_num: false,
-            match_term: Some("cade"),
+            match_term: Some("dent"),
             today: "2026-05-06",
             hidden_keys: &[],
         };
@@ -406,7 +406,7 @@ mod tests {
             .filter(|s| s.style.bg == Some(highlight_bg))
             .map(|s| s.content.as_ref())
             .collect();
-        assert_eq!(highlighted, "Cade");
+        assert_eq!(highlighted, "dent");
     }
 
     /// Render `raw` and return the body text (all span content joined,
