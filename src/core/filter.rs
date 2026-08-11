@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 use chrono::{Datelike, Days, NaiveDate};
 
 use crate::app::{Filter, Sort, WeekStart};
-use crate::search::subseq_match_ci;
+use crate::search::substring_match_ci;
 use crate::threshold;
 use crate::todo::{self, Task};
 
@@ -85,8 +85,8 @@ pub fn sort_by_prefs(idxs: &mut [usize], tasks: &[Task], sort: Sort) {
 }
 
 /// Project / context / search predicate, shared by every view that honors
-/// user filters. `needle` matches as a case-insensitive subsequence of the
-/// task body — chars must appear in order, gaps allowed.
+/// user filters. `needle` matches as a case-insensitive contiguous substring
+/// of the task body.
 pub fn passes_user_filter(t: &Task, filter: &Filter, needle: Option<&str>) -> bool {
     if let Some(p) = &filter.project
         && !t.projects.iter().any(|x| x == p)
@@ -100,7 +100,7 @@ pub fn passes_user_filter(t: &Task, filter: &Filter, needle: Option<&str>) -> bo
     }
     if let Some(needle) = needle {
         let body = todo::body_after_priority(&t.raw);
-        if subseq_match_ci(body, needle).is_none() {
+        if substring_match_ci(body, needle).is_none() {
             return false;
         }
     }
