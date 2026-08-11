@@ -14,7 +14,7 @@ expression: buffer_to_text(&buf)
    +travel          │ ▶ archive completed tasks                              A │                    
                     │   toggle archive view                                  a │1 Finish Q2 board   
  CONTEXTS           │   include archive in autocomplete                      I │aptop               
-   @errands         │   fuzzy search                                         / │6                   
+   @errands         │   search                                               / │6                   
    @home            │   save search as filter                               fs │                    
    @laptop          │                                                          │                    
    @phone           │                                                          │                    

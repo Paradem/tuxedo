@@ -177,7 +177,7 @@ fn push_token_spans<'a>(
         return;
     }
 
-    // plain word — highlight each matched subsequence char inside this token.
+    // plain word — highlight each matched substring char inside this token.
     let base_color = if task.done { theme.done } else { theme.fg };
     let base_style = apply_dim(Style::default().fg(base_color), task.done);
     let hl_style = Style::default()
