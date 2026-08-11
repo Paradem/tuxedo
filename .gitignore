@@ -3,3 +3,5 @@
 target
 # Nix build output
 /result
+# Git worktrees (local isolated workspaces)
+.worktrees/
