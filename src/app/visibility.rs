@@ -128,9 +128,9 @@ mod tests {
     use crate::core::filter::ListDueBucket;
 
     #[test]
-    fn search_matches_subsequence() {
+    fn search_matches_substring() {
         let mut app = build_app("2026-05-01 Call dentist\n2026-05-01 buy milk\n");
-        app.filter.search = "cade".into();
+        app.filter.search = "dent".into();
         app.recompute_visible();
         assert_eq!(app.visible_indices().len(), 1);
     }
