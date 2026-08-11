@@ -41,7 +41,7 @@ const EDITING: Section = (
 const VIEW: Section = (
     "VIEW",
     &[
-        ("/", "fuzzy search"),
+        ("/", "search"),
         ("fp / fc", "filter project/context"),
         ("ff / fs", "saved filter pick/save"),
         ("S", "cycle sort"),

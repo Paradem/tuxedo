@@ -1,7 +1,8 @@
 //! Command palette catalog and filter. Maps every `Action` variant to a
 //! human-readable label and its current keybinding, then filters by fuzzy
-//! subsequence match against the label. Reuses `search::subseq_match_ci` so
-//! the matching semantics stay identical to the `/` task search.
+//! subsequence match against the label using `search::subseq_match_ci`.
+//! (The `/` task-text search uses the contiguous `search::substring_match_ci`
+//! instead — fuzzy matching is the right UX for menu navigation.)
 use super::types::Mode;
 use crate::action::Action;
 use crate::search::subseq_match_ci;
@@ -113,7 +114,7 @@ pub const ENTRIES: &[PaletteEntry] = &[
         action: Action::HalfPageUp,
     },
     PaletteEntry {
-        label: "fuzzy search",
+        label: "search",
         keys: "/",
         action: Action::BeginSearch,
     },
@@ -349,7 +350,7 @@ pub struct PaletteHit {
 /// contains the needle as a case-insensitive subsequence, ranked by:
 ///   1. where the first match sits — byte 0 beats a word-boundary match beats
 ///      a mid-word match. ("arch" → "archive…" before "toggle archive…"
-///      before "fuzzy search".)
+///      before "search".)
 ///   2. tightness of the run (smaller span first).
 ///   3. declaration order, via the stable sort.
 pub fn filtered(needle: &str) -> Vec<PaletteHit> {
@@ -454,7 +455,7 @@ mod tests {
     #[test]
     fn start_of_label_ranks_above_mid_label() {
         // "arch" appears at byte 0 of "archive completed tasks", after a
-        // space in "toggle archive view", and mid-word in "fuzzy search".
+        // space in "toggle archive view", and mid-word in "search".
         // Start-of-label must win.
         let hits = filtered("arch");
         let labels: Vec<&str> = hits.iter().map(|h| ENTRIES[h.entry_idx].label).collect();
@@ -469,13 +470,13 @@ mod tests {
             .iter()
             .position(|&l| l == "toggle archive view")
             .expect("toggle archive view in results");
-        let fuzzy = labels
+        let search = labels
             .iter()
-            .position(|&l| l == "fuzzy search")
-            .expect("fuzzy search in results");
+            .position(|&l| l == "search")
+            .expect("search in results");
         assert!(
-            toggle < fuzzy,
-            "word-boundary match (toggle archive view) should rank above mid-word match (fuzzy search)"
+            toggle < search,
+            "word-boundary match (toggle archive view) should rank above mid-word match (search)"
         );
     }
 
